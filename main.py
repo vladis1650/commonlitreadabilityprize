@@ -1,10 +1,12 @@
-import numpy as np 
+import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-#Read csv
-train_data = pd.read_csv('train.csv')
-test_data = pd.read_csv('test.csv')
+#Stage 1
+train_data = pd.read_csv('data/train.csv')
+test_data = pd.read_csv('data/test.csv')
 
 def get_words (excerpt):
     return excerpt.lower().split()
@@ -41,4 +43,19 @@ df = pd.DataFrame({
 })
 
 df.to_csv('res.csv')
+
+
+#Stage 2
+class InputDto(BaseModel):
+    excerpt: str
+
+app = FastAPI(title="ML API", description="ml model", version="1.0")
+
+@app.post('/predict', tags=["predictions"])
+async def get_prediction(input_dto: InputDto):
+    x_input = get_vector_x(input_dto.excerpt, dict)
+    pred = model.predict([x_input])
+    target = pred[0]
+    return {'target': target}
+
 
